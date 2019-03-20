@@ -28,8 +28,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable().authorizeRequests().antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL)
-				.permitAll().anyRequest().authenticated().and()
-				.addFilter(new AuthenticationFilter(authenticationManager()));
+				.permitAll().anyRequest().authenticated().and().addFilter(getAuthenticationFilter());
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 		auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
 	}
 
-	// change login Spring Security default path
+	// change login default path
 	protected AuthenticationFilter getAuthenticationFilter() throws Exception {
 		final AuthenticationFilter filter = new AuthenticationFilter(authenticationManager());
 		filter.setFilterProcessesUrl("/users/login");
