@@ -33,6 +33,16 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 
+	private void checkIfUserIsNotNull(String args, UserEntity userEntity) {
+		if (userEntity == null)
+			throw new UsernameNotFoundException(args);
+	}
+
+	private void checkIfUserExists(String args) {
+		if (userRepository.findByEmail(args) != null)
+			throw new RuntimeException("Record already exists");
+	}
+
 	@Override
 	public UserDto createUser(UserDto user) {
 
@@ -73,14 +83,17 @@ public class UserServiceImpl implements UserService {
 		return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
 	}
 
-	private void checkIfUserIsNotNull(String email, UserEntity userEntity) {
-		if (userEntity == null)
-			throw new UsernameNotFoundException(email);
-	}
+	@Override
+	public UserDto getUserByUserId(String userId) {
+		UserDto returnValue = new UserDto();
 
-	private void checkIfUserExists(String email) {
-		if (userRepository.findByEmail(email) != null)
-			throw new RuntimeException("Record already exists");
+		UserEntity userEntity = userRepository.findByUserId(userId);
+
+		checkIfUserIsNotNull(userId, userEntity);
+
+		BeanUtils.copyProperties(userEntity, returnValue);
+
+		return returnValue;
 	}
 
 }
