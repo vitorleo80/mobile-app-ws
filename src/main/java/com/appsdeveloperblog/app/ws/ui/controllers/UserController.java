@@ -27,9 +27,9 @@ public class UserController {
 	@Autowired
 	UserService userService;
 
-	@GetMapping
+	@GetMapping()
 	public String getUser() {
-		return "get user was called";
+		return "get user wartrtrtts calleddd";
 	}
 
 	@PostMapping
