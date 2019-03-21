@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.appsdeveloperblog.app.ws.exceptions;
+package com.appsdeveloperblog.app.ws.ui.model.response;
 
 import java.util.Date;
 

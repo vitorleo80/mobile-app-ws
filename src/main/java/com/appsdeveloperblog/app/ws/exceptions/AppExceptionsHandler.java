@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import com.appsdeveloperblog.app.ws.ui.model.response.ErrorMessage;
+
 /**
  * 
  * @author Vitor Correa
