@@ -1,5 +1,7 @@
 package com.appsdeveloperblog.app.ws.ui.controllers;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -146,8 +149,18 @@ public class UserController {
 		AddressDto addresssesDto = addressService.getAddress(addressId);
 
 		ModelMapper modelMapper = new ModelMapper();
+		Link addressLink = linkTo(UserController.class).slash(userId).slash("addresses").slash(addressId).withSelfRel();
+		Link userLink = linkTo(UserController.class).slash(userId).withRel("user");
+		Link addressesLink = linkTo(UserController.class).slash(userId).slash("addresses").withRel("addresses")
+				.withRel("addresses");
 
-		return modelMapper.map(addresssesDto, AddressesRest.class);
+		AddressesRest addressesRest = modelMapper.map(addresssesDto, AddressesRest.class);
+
+		addressesRest.add(addressLink);
+		addressesRest.add(userLink);
+		addressesRest.add(addressesLink);
+
+		return addressesRest;
 	}
 
 }

@@ -3,12 +3,14 @@
  */
 package com.appsdeveloperblog.app.ws.ui.model.response;
 
+import org.springframework.hateoas.ResourceSupport;
+
 /**
  * 
  * @author Vitor Correa
  * @date 22 Mar 2019
  */
-public class AddressesRest {
+public class AddressesRest extends ResourceSupport {
 
 	private String addressId;
 	private String city;
