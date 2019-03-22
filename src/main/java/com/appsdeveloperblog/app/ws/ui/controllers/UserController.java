@@ -11,6 +11,8 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -128,24 +130,33 @@ public class UserController {
 	}
 
 	@GetMapping(path = "/{id}/addresses", produces = { MediaType.APPLICATION_XML_VALUE,
-			MediaType.APPLICATION_JSON_VALUE })
-	public List<AddressesRest> getUserAddresses(@PathVariable String id) {
+			MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+	public Resources<AddressesRest> getUserAddresses(@PathVariable String id) {
 
-		List<AddressesRest> returnValue = new ArrayList<>();
+		List<AddressesRest> addressesListRestModel = new ArrayList<>();
 		List<AddressDto> addressesDto = addressService.getAddresses(id);
 
 		if (addressesDto != null && !addressesDto.isEmpty()) {
 			java.lang.reflect.Type listType = new TypeToken<List<AddressesRest>>() {
 			}.getType();
-			returnValue = new ModelMapper().map(addressesDto, listType);
+			addressesListRestModel = new ModelMapper().map(addressesDto, listType);
+
+			for (AddressesRest addressRest : addressesListRestModel) {
+				Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(id, addressRest.getAddressId()))
+						.withSelfRel();
+				addressRest.add(addressLink);
+
+				Link userLink = linkTo(methodOn(UserController.class).getUser(id)).withRel("user");
+				addressRest.add(userLink);
+			}
 		}
 
-		return returnValue;
+		return new Resources<>(addressesListRestModel);
 	}
 
 	@GetMapping(path = "/{userId}/addresses/{addressId}", produces = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE, "application/hal+json" })
-	public AddressesRest getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
+	public Resource<AddressesRest> getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 
 		AddressDto addresssesDto = addressService.getAddress(addressId);
 
@@ -160,7 +171,7 @@ public class UserController {
 		addressesRest.add(userLink);
 		addressesRest.add(addressesLink);
 
-		return addressesRest;
+		return new Resource<>(addressesRest);
 	}
 
 }
