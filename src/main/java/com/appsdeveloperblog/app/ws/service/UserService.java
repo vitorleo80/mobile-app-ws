@@ -1,4 +1,4 @@
-package com.appsdeveloperblog.app.ws.userservice;
+package com.appsdeveloperblog.app.ws.service;
 
 import java.util.List;
 

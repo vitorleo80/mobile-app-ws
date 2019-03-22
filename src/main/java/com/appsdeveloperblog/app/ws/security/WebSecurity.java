@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.appsdeveloperblog.app.ws.userservice.UserService;
+import com.appsdeveloperblog.app.ws.service.UserService;
 
 /**
  * 
