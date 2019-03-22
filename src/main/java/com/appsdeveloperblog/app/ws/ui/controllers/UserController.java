@@ -1,6 +1,7 @@
 package com.appsdeveloperblog.app.ws.ui.controllers;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,10 +150,9 @@ public class UserController {
 		AddressDto addresssesDto = addressService.getAddress(addressId);
 
 		ModelMapper modelMapper = new ModelMapper();
-		Link addressLink = linkTo(UserController.class).slash(userId).slash("addresses").slash(addressId).withSelfRel();
+		Link addressLink = linkTo(methodOn(UserController.class).getUserAddress(userId, addressId)).withSelfRel();
 		Link userLink = linkTo(UserController.class).slash(userId).withRel("user");
-		Link addressesLink = linkTo(UserController.class).slash(userId).slash("addresses").withRel("addresses")
-				.withRel("addresses");
+		Link addressesLink = linkTo(methodOn(UserController.class).getUserAddresses(userId)).withRel("addresses");
 
 		AddressesRest addressesRest = modelMapper.map(addresssesDto, AddressesRest.class);
 
