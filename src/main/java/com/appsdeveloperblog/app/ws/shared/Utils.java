@@ -54,4 +54,5 @@ public class Utils {
 				.signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret()).compact();
 		return token;
 	}
+
 }
