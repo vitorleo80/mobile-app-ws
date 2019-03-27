@@ -13,6 +13,11 @@ import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendEmailResult;
 import com.appsdeveloperblog.app.ws.shared.dto.UserDto;
 
+/**
+ * 
+ * @author Vitor Correa
+ * @date 27 Mar 2019
+ */
 @Service
 public class AmazonSES {
 

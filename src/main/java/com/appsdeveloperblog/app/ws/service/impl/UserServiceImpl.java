@@ -45,6 +45,9 @@ public class UserServiceImpl implements UserService {
 	Utils utils;
 
 	@Autowired
+	AmazonSES amazonSES;
+
+	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	private void checkIfUserIsNotNull(String args, UserEntity userEntity) {
@@ -52,20 +55,15 @@ public class UserServiceImpl implements UserService {
 			throw new UsernameNotFoundException(args);
 	}
 
-	private void checkIfUserExists(String args) {
-		if (userRepository.findByEmail(args) != null)
-			throw new RuntimeException("Record already exists");
-	}
-
 	@Override
 	public UserDto createUser(UserDto user) {
 
-		checkIfUserExists(user.getEmail());
+		if (userRepository.findByEmail(user.getEmail()) != null)
+			throw new UserServiceException("Record already exists");
 
 		for (int i = 0; i < user.getAddresses().size(); i++) {
 			AddressDto address = user.getAddresses().get(i);
 			address.setUserDetails(user);
-			System.out.println(address.getUserDetails().getId());
 			address.setAddressId(utils.generateUserId());
 			user.getAddresses().set(i, address);
 		}
@@ -73,8 +71,8 @@ public class UserServiceImpl implements UserService {
 		ModelMapper modelMapper = new ModelMapper();
 		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 
-		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		String publicUserId = utils.generateUserId();
+		userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		userEntity.setUserId(publicUserId);
 		userEntity.setEmailVerificationToken(utils.generatePasswordResetToken(publicUserId));
 
@@ -83,7 +81,7 @@ public class UserServiceImpl implements UserService {
 		UserDto returnValue = modelMapper.map(storedUserDetails, UserDto.class);
 
 		// Send email message to user to verify their email address
-		new AmazonSES().verifyEmail(returnValue);
+		amazonSES.verifyEmail(returnValue);
 
 		return returnValue;
 	}
@@ -213,6 +211,39 @@ public class UserServiceImpl implements UserService {
 		passwordResetTokenRepository.save(passwordResetTokenEntity);
 
 		returnValue = new AmazonSES().sendPasswordResetRequest(userEntity.getFirstName(), userEntity.getEmail(), token);
+
+		return returnValue;
+	}
+
+	@Override
+	public boolean resetPassword(String token, String password) {
+		boolean returnValue = false;
+
+		if (Utils.hasTokenExpired(token)) {
+			return returnValue;
+		}
+
+		PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenRepository.findByToken(token);
+
+		if (passwordResetTokenEntity == null) {
+			return returnValue;
+		}
+
+		// Prepare new password
+		String encodedPassword = bCryptPasswordEncoder.encode(password);
+
+		// Update User password in database
+		UserEntity userEntity = passwordResetTokenEntity.getUserDetails();
+		userEntity.setEncryptedPassword(encodedPassword);
+		UserEntity savedUserEntity = userRepository.save(userEntity);
+
+		// Verify if password was saved successfully
+		if (savedUserEntity != null && savedUserEntity.getEncryptedPassword().equalsIgnoreCase(encodedPassword)) {
+			returnValue = true;
+		}
+
+		// Remove Password Reset token from database
+		passwordResetTokenRepository.delete(passwordResetTokenEntity);
 
 		return returnValue;
 	}
